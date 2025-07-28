@@ -48,7 +48,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
+
+                <!-- Champ de recherche -->
+                <div class="users-list-filter px-1 mb-2">
+                    <div class="row border border-light rounded py-2">
+                        <div class="col-12 col-sm-6 col-lg-12">
+                            <label for="search-livraison">Recherche :</label>
+                            <div class="position-relative">
+                                <input type="search" id="search-livraison" class="form-control" placeholder="Rechercher tous les artisans ici...">
+                                <div class="form-control-position">
+                                    <i class="fa fa-search text-size-base text-muted la-rotate-270"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cartes de commandes -->
+
+                <div class="row" id="livraison-liste">
                     <?php
                     // var_dump($rapports);
                     if ($oldlivraisons) {
@@ -64,7 +81,7 @@
                                 }
                             };
                     ?>
-                            <div class="col-xl-4 col-lg-6 col-12 element-item " style="display: block;">
+                            <div class="col-xl-4 col-lg-6 col-12 livraison-item element-item " style="display: block;">
                                 <div class=" card">
                                     <div class="card-content ">
                                         <div class="card-body">

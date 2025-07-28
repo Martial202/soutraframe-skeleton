@@ -52,7 +52,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td class="px-1">Demandeur(se):</td>
-                                                                <td class=""><b><?= @$detailsDevis['civilite'] .' '. @$detailsDevis['full_name'] ?></b></td>
+                                                                <td class=""><b><?= @$detailsDevis['civilite'] . ' ' . @$detailsDevis['full_name'] ?></b></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="px-1">Telephone:</td>
@@ -64,12 +64,36 @@
                                                             </tr>
                                                             <tr>
                                                                 <td class="px-1">Date Livraison:</td>
-                                                                <td class=""><b><?= @$detailsDevis['date_livraison'] ?></b></td>
+                                                                <td class=""><b><?= @$detailsDevis['delai_livraison'] ?></b></td>
                                                             </tr>
-                                                            <!-- <tr>
-                                                                <td class="px-1">Date Commande:</td>
-                                                                <td class=""><b><?= @$detailsDevis['date_commande'] ?></b></td>
-                                                            </tr> -->
+                                                            <tr class="<?= (@$detailsDevis['fichier'] != null) ? '' : 'hidden' ?>">
+                                                                <td class="px-1">
+                                                                    Pièce jointe :
+                                                                    <b>Il y a un document en pièce jointe</b>
+                                                                </td>
+                                                                <td>
+
+
+                                                                    <div class="flex space-x-2 mt-2">
+                                                                        <!-- Bouton Télécharger -->
+                                                                        <a href="<?=RACINE_EXTERNE.$detailsDevis['fichier_chemin'] ?>"
+                                                                            download="<?= @$detailsDevis['fichier'] ?>"
+                                                                            class="btn btn-primary btn-sm">
+                                                                            <i class="feather icon-download"></i> Télécharger
+                                                                        </a>
+
+                                                                        <!-- Bouton Imprimer -->
+                                                                        <a href="<?= RACINE_EXTERNE.$detailsDevis['fichier_chemin'] ?>"
+                                                                            class="btn btn-secondary btn-sm"
+                                                                            id="btn-print-pdf"
+                                                                            data-fichier="<?= RACINE_EXTERNE.$detailsDevis['fichier_chemin'] ?>">
+                                                                            <i class="feather icon-printer"></i> Imprimer
+                                                                        </a>
+
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+
                                                         </table>
                                                     </div>
                                                 </div>
@@ -97,7 +121,7 @@
                                 </div>
                                 <div class="card-content m-2 pb-2">
                                     <div id="audience-list-scroll" class="table-responsive position-relative">
-                                        <textarea class="form-control" name="" id="" rows="20" cols=""><?= @$detailsDevis['description'] ?></textarea>
+                                        <textarea class="form-control" name="" id="" rows="20" cols=""><?= @$detailsDevis['message'] ?></textarea>
                                     </div>
                                     <hr>
                                     <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content">
@@ -121,6 +145,28 @@
         </div>
     </div>
     <!-- END: Content-->
+    <script>
+        document.getElementById('btn-print-pdf').addEventListener('click', function(e) {
+            e.preventDefault();
+            const fichierURL = this.getAttribute('data-fichier');
+
+            // Ouvre directement le fichier PDF dans un nouvel onglet (aucun HTML de ton site n'est inclus)
+            const printWindow = window.open(fichierURL, '_blank');
+
+            if (!printWindow) {
+                alert("Veuillez autoriser les fenêtres pop-up pour imprimer le document.");
+                return;
+            }
+
+            // Petite pause pour que le PDF soit bien chargé avant d'imprimer
+            printWindow.onload = function() {
+                setTimeout(() => {
+                    printWindow.focus();
+                    printWindow.print();
+                }, 800); // délais en ms
+            };
+        });
+    </script>
 
     <!-- Modal édition -->
 

@@ -9,23 +9,24 @@ class PDF extends FPDF
         $logoPath = __DIR__ . '/logo.jpg'; // adapte si le fichier est ailleurs
 
         if (file_exists($logoPath)) {
-            $this->Image($logoPath, 10, 5, 40,40);
+            $this->Image($logoPath, 10, 5, 40, 40);
         }
 
         // Déplacement à droite (position du curseur pour le texte)
         $this->SetXY(50, 12); // x = 50 pour laisser la place au logo, y = 12 pour bien aligner verticalement
 
-        $this->SetFont('Arial', 'B', 18);
+        $this->SetFont('Arial', 'B', 23);
         $this->Cell(0, 10, 'BON DE LIVRAISON', 0, 1, 'C');
 
         $this->SetX(50);
-        $this->SetFont('Courier', '', 12);
-        $this->Cell(0, 7, 'Tel: 07 77 51 57 89 / 05 95 90 26 51', 0, 1, 'C');
-
+        $this->SetFont('Courier', '', 10);
+        $this->Cell(0, 7, utf8_decode('Yopougon, Cité verte'), 0, 1, 'C');
         $this->SetX(50);
-        $this->Cell(0, 7, 'a.kouamemartial7@gmail.com', 0, 1, 'C');
+        $this->Cell(0, 7, 'Email: buro-store@outlook.fr', 0, 1, 'C');
+        $this->SetX(50);
+        $this->Cell(0, 7, 'Tel: 05 56 33 38 87 / 07 07 93 67 49', 0, 1, 'C');
 
-        $this->Ln(20); // espace après le header
+        $this->Ln(15); // espace après le header
     }
 
 
@@ -64,7 +65,7 @@ class PDF extends FPDF
             1
         );
 
-        $this->Ln(40);
+        $this->Ln(25);
     }
 
     function TableauProduits($produits)
@@ -85,7 +86,7 @@ class PDF extends FPDF
             $this->Cell(40, 10, ' ' . $prod['libelle_categorie'], 'L', 0, 'C');
             $this->Cell(20, 10, ' ' . $prod['qte_ligne'], 'L', 0, 'C');
             $this->Cell(30, 10, ' ' . number_format($prod['prix_produit'], 0, ',', ' ') . ' F', 'L', 0, 'C');
-            $this->Cell(40, 10, ' ' . $prod['qte_ligne'] * $prod['prix_produit'], 'LR', 0, 'C');
+            $this->Cell(40, 10, ' ' . number_format($prod['qte_ligne'] * $prod['prix_produit'], 0, ',', ' '), 'LR', 0, 'C');
             $this->Ln();
             $total += $prod['qte_ligne'] * $prod['prix_produit'];
         }
@@ -100,23 +101,37 @@ class PDF extends FPDF
         $this->Ln(15);
     }
 
+    // function Footer()
+    // {
+    //     $this->SetY(-30);
+    //     $this->SetFont('Courier', '', 11);
+    //     $this->Cell(0, 10, 'Souche', 0, 0, 'L');
+    //     $this->Cell(0, 10, 'Signature: ______________________', 0, 0, 'R');
+    // }
+
     function Footer()
     {
         $this->SetY(-30);
         $this->SetFont('Courier', '', 11);
-        $this->Cell(0, 10, 'Souche', 0, 0, 'L');
+
+        // Si c'est la deuxième page (souche)
+        if ($this->PageNo() == 2) {
+            $this->Cell(0, 10, 'SOUCHE', 0, 0, 'L');
+        } else {
+            $this->Cell(0, 10, '', 0, 0, 'L');
+        }
+
+        // Signature à droite (sur toutes les pages)
         $this->Cell(0, 10, 'Signature: ______________________', 0, 0, 'R');
     }
+
 
     // Ajoute une deuxième page avec la mention "SOUCHE"
     function addSoucheCopy($commande, $produits)
     {
         $this->AddPage();
         $this->SetFont('Courier', 'B', 16);
-        // $this->Cell(0, 10, 'SOUCHE - COPIE INTERNE', 0, 1, 'C');
         $this->Ln(5);
-        // $this->SetY(-30);
-        // $this->Cell(0, 10, 'Souche', 0, 0, 'L');
 
         $this->InfoCommande($commande);
         $this->TableauProduits($produits);

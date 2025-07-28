@@ -339,6 +339,61 @@ function addImages() {
   });
 }
 
+// Recherche
+function initLiveSearch(inputSelector, targetSelector, options = {}) {
+  const input = document.querySelector(inputSelector);
+  const targets = document.querySelectorAll(targetSelector);
+
+  const {
+    noResultMessage = "Aucun résultat trouvé.",
+    noResultId = "no-result-message",
+    debounceTime = 300,
+    messageContainerSelector = null // si tu veux spécifier où mettre le message
+  } = options;
+
+  if (!input || targets.length === 0) return;
+
+  // Crée ou récupère le message "Aucun résultat"
+  let noResult = document.getElementById(noResultId);
+  if (!noResult) {
+    noResult = document.createElement("div");
+    noResult.id = noResultId;
+    noResult.className = "text-center text-danger mt-2";
+    noResult.style.display = "none";
+
+    if (messageContainerSelector) {
+      const container = document.querySelector(messageContainerSelector);
+      if (container) container.appendChild(noResult);
+    } else {
+      // par défaut on le met après la liste
+      const parent = targets[0].closest("section, .content-body, .card, .row");
+      parent?.appendChild(noResult);
+    }
+  }
+
+  noResult.innerText = noResultMessage;
+
+  // Filtrage avec délai (debounce)
+  let timeout = null;
+  input.addEventListener('input', function () {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      const query = input.value.toLowerCase();
+      let matchCount = 0;
+
+      targets.forEach(target => {
+        const text = target.textContent.toLowerCase();
+        const match = text.includes(query);
+        target.style.display = match ? 'block' : 'none';
+        if (match) matchCount++;
+      });
+
+      noResult.style.display = matchCount === 0 ? 'block' : 'none';
+    }, debounceTime);
+  });
+}
+// filtre
+
 
 function addLivraison() {
   $('.form_add_Livraison').on('submit', function (e) {
@@ -376,7 +431,7 @@ function addLivraison() {
                 data: { id: response.id_livraison },
                 xhrFields: { responseType: 'blob' },
                 success: function (data) {
-                  // console.log(data); return; // ← ça te dira si c’est un PDF ou du texte d’erreur
+                  console.log(data); // ← ça te dira si c’est un PDF ou du texte d’erreur
                   const blob = new Blob([data], { type: 'application/pdf' });
                   const url = URL.createObjectURL(blob);
                   window.open(url, '_blank');
@@ -456,7 +511,7 @@ function editUsers() // form
       // Créer un objet FormData pour gérer l'upload de fichiers
       let formData = $(this).serialize();
       console.log(formData);
-      
+
       $.ajax({
         url: LINK + 'usersController/edit',
         type: 'POST',
@@ -496,42 +551,42 @@ function modifPassword() // form
 
     // Vérifie si le formulaire est valide
     // if (formIsValided(table)) {
-      // Créer un objet FormData pour gérer l'upload de fichiers
-      let formData = $(this).serialize();
-      console.log(formData);
-      
-      $.ajax({
-        url: LINK + 'usersController/editPassword',
-        type: 'POST',
-        data: formData,
-        beforeSend: function () {
-          loading('.btn_actions', 'disabled', '<i class="fa fa-spinner fa-spin fa-2x text-light"></i>'); // activer loader
-        },
-        success: function (rep) {
-          // console.log(rep);return
-          let response = JSON.parse(rep);
+    // Créer un objet FormData pour gérer l'upload de fichiers
+    let formData = $(this).serialize();
+    console.log(formData);
 
-          loading('.btn_actions', false, '<button type="submit" class="btn btn-primary py-0 btn_action">Sauvegarder</button>'); // desactiver loader
-          if (response.status == 1) {
-            showAlert('Félicitations !', response.msg, 'success');
-            setInterval(() => {
-              location.reload(); // Actualise la page si nécessaire
+    $.ajax({
+      url: LINK + 'usersController/editPassword',
+      type: 'POST',
+      data: formData,
+      beforeSend: function () {
+        loading('.btn_actions', 'disabled', '<i class="fa fa-spinner fa-spin fa-2x text-light"></i>'); // activer loader
+      },
+      success: function (rep) {
+        // console.log(rep);return
+        let response = JSON.parse(rep);
 
-            }, 2000)
-          } else {
-            showAlert('Désolé !', response.msg, 'error');
-          }
-        },
-        error: function (xhr, status, error) {
-          alert('Erreur :' + error);
+        loading('.btn_actions', false, '<button type="submit" class="btn btn-primary py-0 btn_action">Sauvegarder</button>'); // desactiver loader
+        if (response.status == 1) {
+          showAlert('Félicitations !', response.msg, 'success');
+          setInterval(() => {
+            location.reload(); // Actualise la page si nécessaire
+
+          }, 2000)
+        } else {
+          showAlert('Désolé !', response.msg, 'error');
         }
-      });
+      },
+      error: function (xhr, status, error) {
+        alert('Erreur :' + error);
+      }
+    });
     // }
   });
 }
 
 
-function countNewElement(select, endPoint,selectDot) // form
+function countNewElement(select, endPoint, selectDot) // form
 {
   $.ajax({
     url: LINK + endPoint,
@@ -706,7 +761,7 @@ function ajaxRequest(url, data, method) {
 
 
       setTimeout(function () {
-        //var printWindow = window.open(response.lien); 
+        //var printWindow = window.open(response.lien);
         if (printWindow) {
           printWindow.focus(); // Assure que la fenêtre est active
           printWindow.print(); // Lance l'impression
@@ -873,7 +928,7 @@ function ajaxRequest(url, data, method) {
       window.location.href = LINK + 'artisant/new_agent';
 
       setTimeout(function () {
-        //var printWindow = window.open(response.lien); 
+        //var printWindow = window.open(response.lien);
         if (printWindow) {
           printWindow.focus(); // Assure que la fenêtre est active
           printWindow.print(); // Lance l'impression
@@ -1447,5 +1502,3 @@ function calculerDateFin(dateDebutSelector, nombreCautionSelector, dateFinSelect
     $(dateFinSelector).val(dateFin);
   }
 }
-
-

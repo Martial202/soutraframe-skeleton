@@ -28,10 +28,10 @@ class ModelCommande
         }
     }
 
-    public function getCommandeOFPrintByIds($id) // retourne les infos de la commande en fonction de l'id
+    public function getCommandeOFPrintByIds($cond,$id) // retourne les infos de la commande en fonction de l'id
     {
         try {
-            $sql = 'SELECT c.*, l.code_livraison, l.date_livraison, li.full_name FROM commandes c, livraison l, livreurs li WHERE c.ref_commande = l.ref_commande AND li.id_livreur = l.livreur_id AND l.id_livraison = ?';
+            $sql = "SELECT c.*, l.code_livraison, l.date_livraison, li.full_name FROM commandes c, livraison l, livreurs li WHERE c.ref_commande = l.ref_commande AND li.id_livreur = l.livreur_id AND $cond = ?";
 
             $query = $this->pdo->getCon()->prepare($sql);
 
@@ -104,40 +104,5 @@ class ModelCommande
             die('Erreur de recuperation' . $e->getMessage());
         }
     }
-
-    // public function addCommandes($data) // add a new client
-    // {
-    //     try {
-    //         $sql = ' INSERT INTO commandes (code_commande, libelle_commande, qte_commande, prix_commande, description_commande,categorie_id) VALUES (?,?,?,?,?,?)';
-
-    //         $query = $this->pdo->getCon()->prepare($sql);
-
-    //         if ($query->execute($data)) {
-    //             return true;
-    //         } else {
-    //             return false;
-    //         }
-    //     } catch (\Exception $e) {
-    //         die("Erreur d'insertion" . $e->getMessage());
-    //     }
-    // }
-
-    // public function updateCommande($data) // mise a jour du status rapport
-    // {
-    //     try {
-    //         $sql = 'UPDATE commandes SET libelle_commande = ?, qte_commande =? , prx_commande = ? , description_commande =? , categorie_id =? WHERE id_commande = ?';
-    //         $query = $this->pdo->getCon()->prepare($sql);
-    //         if ($query->execute($data)) {
-    //             return true;
-    //         } else {
-    //             return false;
-    //         }
-    //     } catch (\Exception $e) {
-    //         die('Erreur :' . $e->getMessage());
-    //     }
-    // }
-
-
-
 
 }

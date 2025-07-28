@@ -89,7 +89,7 @@ class CommandeController
         }
 
         $id_livraison = intval($_GET['id']);
-        $dataCommande = $this->commande->getCommandeOFPrintByIds($id_livraison);
+        $dataCommande = $this->commande->getCommandeOFPrintByIds("l.id_livraison", $id_livraison);
         $produits = $this->commande->getProduitOfCommandes($dataCommande['id_commande']);
         // Tu peux ici faire une requête en base pour récupérer commande + produits
         // Exemple statique pour test :
@@ -104,9 +104,88 @@ class CommandeController
             'lieu_livraison' => $dataCommande['lieu_livraison']
         ];
 
-        // $produits = [
-        //     ['produit' => 'Bureau en bois', 'categorie' => 'Mobilier', 'quantite' => 2, 'pu' => 45000, 'formule' => 'Standard'],
-        //     ['produit' => 'Chaise Directeur', 'categorie' => 'Mobilier', 'quantite' => 1, 'pu' => 30000, 'formule' => 'Deluxe']
+        // $commande = [
+        //     'code_livraison' => $dataCommande['code_livraison'],
+        //     'client' => $dataCommande['full_name_client'],
+        //     'adresse' => $dataCommande['lieu_livraison'],
+        //     'contact' => $dataCommande['telephone_client'],
+        //     'date_livraison' => $dataCommande['date_livraison']
+        // ];
+
+        require_once '../views/commande/impression_livraison.php';
+
+
+        $pdf = new PDF();
+        $pdf->AddPage();
+        $pdf->InfoCommande($commande);
+        $pdf->TableauProduits($produits);
+
+        // Deuxième page = souche
+        $pdf->addSoucheCopy($commande, $produits);
+
+        // Retourne le PDF pour AJAX (output blob)
+        ob_clean();
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="bon_livraison.pdf"');
+        echo $pdf->Output('S');
+        exit;
+    }
+
+    public function imprimer($param)
+    {
+        if (!isset($param) || empty($param)) {
+            http_response_code(400);
+            exit("ID livraison manquant");
+        }
+        // Décrypte le paramètre pour obtenir l'ID de la livraison
+        // Assurez-vous que le paramètre est correctement formaté
+        $id = $this->validator->decrypter($param);
+        if (!$id) {
+            http_response_code(400);
+            exit("ID livraison invalide");
+        }
+        // Récupère les données de la commande et des produits associés
+        // Assurez-vous que la méthode getCommandeOFPrintByIds est correctement définie dans ModelCommande
+        if (!is_numeric($id)) {
+            http_response_code(400);
+            exit("ID livraison invalide");
+        }
+        // Récupère les données de la commande et des produits associés
+        $id = intval($id); // Assurez-vous que l'ID est un entier
+        if ($id <= 0) {
+            http_response_code(400);
+            exit("ID livraison invalide");
+        }
+        // Récupère les données de la commande et des produits associés
+        $dataCommande = $this->commande->getCommandeOFPrintByIds("c.id_commande", $id);
+        if (!$dataCommande) {
+            http_response_code(404);
+            exit("Commande non trouvée");
+        }
+        $produits = $this->commande->getProduitOfCommandes($dataCommande['id_commande']);
+        if (!$produits) {
+            http_response_code(404);
+            exit("Aucun produit trouvé pour cette commande");
+        }
+        // Tu peux ici faire une requête en base pour récupérer commande + produits
+        // Exemple statique pour test :
+        $commande = [
+            'code_commande' => $dataCommande['ref_commande'],
+            'code_livraison' => $dataCommande['code_livraison'],
+            'date_commande' => $dataCommande['date_commande'],
+            'date_livraison' => $dataCommande['date_livraison'],
+            'livreur' => $dataCommande['full_name'],
+            'client' => $dataCommande['full_name_client'],
+            'contact' => $dataCommande['telephone_client'],
+            'lieu_livraison' => $dataCommande['lieu_livraison']
+        ];
+
+        // $commande = [
+        //     'code_livraison' => $dataCommande['code_livraison'],
+        //     'client' => $dataCommande['full_name_client'],
+        //     'adresse' => $dataCommande['lieu_livraison'],
+        //     'contact' => $dataCommande['telephone_client'],
+        //     'date_livraison' => $dataCommande['date_livraison']
         // ];
 
         require_once '../views/commande/impression_livraison.php';
@@ -132,7 +211,7 @@ class CommandeController
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // On suppose que "nouvelle commande" = etat_commande = 0
-            $count = $this->validator->countCommandesByEtat("commandes", "etat_commande",0); // À créer dans ModelCommande si besoin
+            $count = $this->validator->countCommandesByEtat("commandes", "etat_commande", 0); // À créer dans ModelCommande si besoin
             if ($count !== false && $count > 0) {
                 $msg = ['status' => 1, 'count' => $count];
             } else {
@@ -141,33 +220,4 @@ class CommandeController
             echo json_encode($msg);
         }
     }
-
-
-
-    // public function add() // add proprio
-    // {
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $fPost = Validator::sanitizeInput($_POST);
-    //         $notEmpty = Validator::validateRequiredFields($fPost);
-    //         extract($fPost);
-    //         if ($notEmpty === true) {
-    //             if (!$this->validator->_verif('produits', 'libelle_produit', $libelle_produit, 'categorie_id', $categorie_id)) {
-    //                 $data = [$code_produit, $libelle_produit, $qte_produit, $prix_produit, $description_produit, $categorie_id];
-    //                 // var_dump("colman",$data);return;
-    //                 if ($this->produit->addProduits($data)) {
-    //                     $msg = ['status' => 1, 'msg' => 'Enregistrement effectué avec succès !'];
-    //                 } else {
-    //                     $msg = ['status' => 2, 'msg' => "Erreur d'insertion"];
-    //                 }
-    //             } else {
-    //                 $msg = ['status' => 2, 'msg' => 'Cette chambre regionale existe déjà !']; // Affiche les erreurs ❌
-    //             }
-    //         } else {
-    //             $msg = ['status' => 2, 'msg' => 'Veuillez renseigner tous les champs!']; // Affiche les erreurs ❌
-    //         }
-    //         echo json_encode($msg);
-    //     }
-    // }
-
-
 }

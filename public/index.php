@@ -34,6 +34,7 @@ $route->addRoute('/produit/categorie/{params}', [$categorieController, 'index'])
 $route->addRoute('/commande/historique', [$commandeController, 'history']); //vue
 $route->addRoute('/commande/nouveau', [$commandeController, 'index']); //vue
 $route->addRoute('/commande/details/{params}', [$commandeController, 'traitement']); //vue
+$route->addRoute('/commande/imprimer/{params}', [$commandeController, 'imprimer']); // Vue de settings
 $route->addRoute('/home/parametres', [$settingController, 'index']); // Vue de settings
 $route->addRoute('/user/profil', [$userController, 'index']); // Vue de settings
 $route->addRoute('/livraison/nouveau', [$livraisonController, 'index']); // Vue de settings
