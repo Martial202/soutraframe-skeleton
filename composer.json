@@ -1,0 +1,6 @@
+{
+  "name": "smartcodes/soutraframe-skeleton",
+  "description": "Structure minimale de projet SoutraFrame, sans dépendance",
+  "license": "MIT",
+  "type": "project"
+}
