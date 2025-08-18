@@ -1,0 +1,98 @@
+# 📌 README – Gestion automatique de l’admin par procédure SQL
+
+## ⚙️ Objectif
+Ce système permet de s’assurer qu’un **compte administrateur par défaut** existe toujours dans la base de données.  
+- Si l’admin n’existe pas → il est créé automatiquement.  
+- Si l’admin existe mais que son mot de passe est incorrect → il est mis à jour avec le bon hash.  
+
+---
+
+## 🛠️ 1. Création de la procédure
+
+Exécute ce script SQL dans **phpMyAdmin** ou ton client MySQL habituel :
+
+```sql
+DELIMITER $$
+
+CREATE PROCEDURE EnsureAdminExists()
+BEGIN
+    DECLARE v_id INT;
+    DECLARE v_password VARCHAR(255);
+
+    -- Vérifier si l'admin existe déjà par téléphone
+    SELECT id, password INTO v_id, v_password
+    FROM admin
+    WHERE telephone = '0777515789'
+    LIMIT 1;
+
+    -- Si trouvé, corriger le mot de passe si besoin
+    IF v_id IS NOT NULL THEN
+        IF v_password <> '$2y$10$pgZ/x68OO2Hx4JB1X2h5PO7AokbuPLXDxvnKLe3YZxPfbUH53w3di' THEN
+            UPDATE admin
+            SET password = '$2y$10$pgZ/x68OO2Hx4JB1X2h5PO7AokbuPLXDxvnKLe3YZxPfbUH53w3di'
+            WHERE id = v_id;
+        END IF;
+    ELSE
+        -- Sinon, créer l'admin avec toutes les infos
+        INSERT INTO admin (telephone, password, name, firstname, email)
+        VALUES (
+            '0777515789',
+            '$2y$10$pgZ/x68OO2Hx4JB1X2h5PO7AokbuPLXDxvnKLe3YZxPfbUH53w3di',
+            'Developpeur',
+            'Fullstack',
+            'a.kouamemartial7@gmail.com'
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+🛠️ 2. Commandes utiles
+Appeler la procédure manuellement :
+
+sql
+Copier
+Modifier
+CALL EnsureAdminExists();
+Supprimer la procédure :
+
+sql
+Copier
+Modifier
+DROP PROCEDURE IF EXISTS EnsureAdminExists;
+Lister les procédures existantes :
+
+sql
+Copier
+Modifier
+SHOW PROCEDURE STATUS WHERE Db = 'nom_de_ta_base';
+🛠️ 3. Intégration dans PHP
+Dans ta classe Database, tu peux appeler la procédure automatiquement après connexion :
+
+php
+Copier
+Modifier
+try {
+    $this->pdo = new PDO($this->dns, $this->user, $this->password, [
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4'
+    ]);
+
+    // Vérifie et corrige/crée l'admin
+    $this->pdo->query("CALL EnsureAdminExists()");
+    
+} catch (Exception $e) {
+    die("Erreur de connexion à la base de données : " . $e->getMessage());
+}
+🔒 4. Infos importantes
+Le mot de passe stocké est un hash bcrypt :
+
+perl
+Copier
+Modifier
+$2y$10$pgZ/x68OO2Hx4JB1X2h5PO7AokbuPLXDxvnKLe3YZxPfbUH53w3di
+👉 tu peux le régénérer avec password_hash("ton_mot_de_passe", PASSWORD_BCRYPT).
+
+Cette procédure peut être appelée à chaque connexion PHP pour garantir la présence de l’admin.
+
+Si tu changes le téléphone ou l’email, pense à modifier la procédure.
