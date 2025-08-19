@@ -170,6 +170,13 @@ print_r($users);
 Projet conçu et développé par **SmartCodes Team**.
 
 ---
+---
+
+## 🧑‍💻 Generate this package
+
+`composer create-project smartcodes/soutraframe-skeleton project_name`\
+
+---
 
 ## 📜 Licence
 
@@ -186,3 +193,4 @@ Aucune reproduction sans autorisation.
 * Organise les vues par dossier (ex: `views/produits/`, `views/commandes/`).
 
 ---
+
