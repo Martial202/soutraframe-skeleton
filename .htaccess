@@ -1,3 +1,13 @@
 RewriteEngine On
+
+# --- Ignorer le sous-domaine admin.gbekeinfos.net ---
+#RewriteCond %{HTTP_HOST} ^admin\.gbekeinfos\.net$ [NC]
+#RewriteRule ^ - [L]
+
+# --- Ignorer plusieurs sous-domaines ---
+#RewriteCond %{HTTP_HOST} ^(admin|blog|api)\.gbekeinfos\.net$ [NC]
+#RewriteRule ^ - [L]
+
+# --- Règles pour le domaine principal ---
 RewriteRule ^$ public/ [L]
 RewriteRule (.*) public/$1 [L]
